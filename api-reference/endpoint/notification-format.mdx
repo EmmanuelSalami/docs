@@ -7,80 +7,100 @@ description: 'Learn about the notification format sent to your webhook'
 
 When a new video is uploaded to a subscribed YouTube channel, the system sends a notification to your webhook URL. This page describes the format of these notifications.
 
-## Standard Notification Format
+## Actual Notification Format
 
-The notification is sent as a JSON payload in the body of a POST request to your webhook URL. The payload contains information about the new video and the channel that uploaded it.
+The notification is sent as a JSON array containing a single object in the body of a POST request to your webhook URL. The payload contains the complete YouTube notification data, including headers and the parsed Atom XML feed.
 
 ```json
-{
-  "event": "youtube.video.published",
-  "video": {
-    "id": "dQw4w9WgXcQ",
-    "title": "Video Title",
-    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "published_at": "2023-05-05T10:30:00Z",
-    "updated_at": "2023-05-05T10:30:00Z"
-  },
-  "channel": {
-    "id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
-    "name": "Channel Name"
-  },
-  "timestamp": "2023-05-05T10:35:00Z"
-}
+[
+  {
+    "headers": {
+      "host": "your-webhook-domain.com",
+      "user-agent": "FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)",
+      "content-length": "879",
+      "accept": "*/*",
+      "accept-encoding": "gzip, br",
+      "cache-control": "no-cache,max-age=0",
+      "content-type": "application/atom+xml",
+      "from": "googlebot(at)googlebot.com",
+      "link": "<https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC1PsYPhJWpgcM88C4txYp1Q>; rel=self, <http://pubsubhubbub.appspot.com/>; rel=hub",
+      "pragma": "no-cache"
+    },
+    "params": {},
+    "query": {},
+    "body": {
+      "feed": {
+        "$": {
+          "xmlns:yt": "http://www.youtube.com/xml/schemas/2015",
+          "xmlns": "http://www.w3.org/2005/Atom"
+        },
+        "link": [
+          {
+            "$": {
+              "rel": "hub",
+              "href": "https://pubsubhubbub.appspot.com"
+            }
+          },
+          {
+            "$": {
+              "rel": "self",
+              "href": "https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC1PsYPhJWpgcM88C4txYp1Q"
+            }
+          }
+        ],
+        "title": "YouTube video feed",
+        "updated": "2025-02-28T23:59:32.182345149+00:00",
+        "entry": {
+          "id": "yt:video:Tb2YL-aCg7c",
+          "yt:videoid": "Tb2YL-aCg7c",
+          "yt:channelid": "UC1PsYPhJWpgcM88C4txYp1Q",
+          "title": "AI Solution Demo",
+          "link": {
+            "$": {
+              "rel": "alternate",
+              "href": "https://www.youtube.com/watch?v=Tb2YL-aCg7c"
+            }
+          },
+          "author": {
+            "name": "Crazy Clones AI",
+            "uri": "https://www.youtube.com/channel/UC1PsYPhJWpgcM88C4txYp1Q"
+          },
+          "published": "2025-02-28T23:58:41+00:00",
+          "updated": "2025-02-28T23:59:32.182345149+00:00"
+        }
+      }
+    },
+    "webhookUrl": "https://your-webhook-domain.com/webhook/path",
+    "executionMode": "production"
+  }
+]
 ```
 
-## Field Descriptions
+## Extracting Key Information
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `event` | string | The type of event. Always `youtube.video.published` for new video notifications. |
-| `video.id` | string | The YouTube video ID. |
-| `video.title` | string | The title of the video. |
-| `video.url` | string | The full URL to the video on YouTube. |
-| `video.published_at` | string | The date and time when the video was published, in ISO 8601 format. |
-| `video.updated_at` | string | The date and time when the video was last updated, in ISO 8601 format. |
-| `channel.id` | string | The YouTube channel ID. |
-| `channel.name` | string | The name of the channel. |
-| `timestamp` | string | The date and time when the notification was sent, in ISO 8601 format. |
+To extract the important information from this notification, you'll need to access specific paths in the JSON structure:
 
-## Original YouTube Data
-
-The notification format is a simplified version of the original Atom XML feed data sent by YouTube. The system parses this XML data and converts it to a more user-friendly JSON format.
-
-Here's an example of the original Atom XML feed data from YouTube:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://www.w3.org/2005/Atom">
-  <link rel="hub" href="https://pubsubhubbub.appspot.com"/>
-  <link rel="self" href="https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC_x5XG1OV2P6uZZ5FSM9Ttw"/>
-  <title>YouTube video feed</title>
-  <updated>2023-05-05T10:30:00Z</updated>
-  <entry>
-    <id>yt:video:dQw4w9WgXcQ</id>
-    <yt:videoId>dQw4w9WgXcQ</yt:videoId>
-    <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
-    <title>Video Title</title>
-    <link rel="alternate" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"/>
-    <author>
-      <name>Channel Name</name>
-      <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
-    </author>
-    <published>2023-05-05T10:30:00Z</published>
-    <updated>2023-05-05T10:30:00Z</updated>
-  </entry>
-</feed>
-```
+| Information | JSON Path | Example Value |
+| ----------- | --------- | ------------- |
+| Video Title | `[0].body.feed.entry.title` | "AI Solution Demo" |
+| Channel Name | `[0].body.feed.entry.author.name` | "Crazy Clones AI" |
+| Video ID | `[0].body.feed.entry["yt:videoid"]` | "Tb2YL-aCg7c" |
+| Channel ID | `[0].body.feed.entry["yt:channelid"]` | "UC1PsYPhJWpgcM88C4txYp1Q" |
+| Video URL | `[0].body.feed.entry.link.$.href` | "https://www.youtube.com/watch?v=Tb2YL-aCg7c" |
+| Published Date | `[0].body.feed.entry.published` | "2025-02-28T23:58:41+00:00" |
 
 ## Handling Notifications in N8N
 
-If you're using N8N, you can create a workflow that starts with a Webhook node to receive these notifications. Here's how to set it up:
+If you're using N8N, you can create a workflow that starts with a Webhook node to receive these notifications. Here's how to extract key information:
 
 1. Create a new workflow in N8N
 2. Add a Webhook node as the trigger
 3. Configure the Webhook node to receive POST requests
 4. Use the webhook URL provided by N8N when subscribing to YouTube channels
-5. Add nodes to process the notification data as needed
+5. Add a "Set" node to extract the key information using these expressions:
+   - `videoTitle`: `{{ $json[0]["body"]["feed"]["entry"]["title"] }}`
+   - `channelName`: `{{ $json[0]["body"]["feed"]["entry"]["author"]["name"] }}`
+   - `videoLink`: `{{ $json[0]["body"]["feed"]["entry"]["link"]["$"]["href"] }}`
 
 For more details, see the [N8N Integration](/n8n-integration/getting-started) section.
 
@@ -92,23 +112,96 @@ To test your webhook endpoint, you can use the following cURL command to simulat
 curl --request POST \
   --url 'https://your-webhook-url.com/endpoint' \
   --header 'Content-Type: application/json' \
-  --data '{
-    "event": "youtube.video.published",
-    "video": {
-      "id": "dQw4w9WgXcQ",
-      "title": "Test Video",
-      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "published_at": "2023-05-05T10:30:00Z",
-      "updated_at": "2023-05-05T10:30:00Z"
+  --data-raw '[
+  {
+    "headers": {
+      "host": "your-webhook-domain.com",
+      "user-agent": "FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)",
+      "content-length": "879",
+      "content-type": "application/atom+xml",
+      "link": "<https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC1PsYPhJWpgcM88C4txYp1Q>; rel=self, <http://pubsubhubbub.appspot.com/>; rel=hub"
     },
-    "channel": {
-      "id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
-      "name": "Test Channel"
+    "params": {},
+    "query": {},
+    "body": {
+      "feed": {
+        "$": {
+          "xmlns:yt": "http://www.youtube.com/xml/schemas/2015",
+          "xmlns": "http://www.w3.org/2005/Atom"
+        },
+        "link": [
+          {
+            "$": {
+              "rel": "hub",
+              "href": "https://pubsubhubbub.appspot.com"
+            }
+          },
+          {
+            "$": {
+              "rel": "self",
+              "href": "https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC1PsYPhJWpgcM88C4txYp1Q"
+            }
+          }
+        ],
+        "title": "YouTube video feed",
+        "updated": "2025-02-28T23:59:32.182345149+00:00",
+        "entry": {
+          "id": "yt:video:Tb2YL-aCg7c",
+          "yt:videoid": "Tb2YL-aCg7c",
+          "yt:channelid": "UC1PsYPhJWpgcM88C4txYp1Q",
+          "title": "AI Solution Demo",
+          "link": {
+            "$": {
+              "rel": "alternate",
+              "href": "https://www.youtube.com/watch?v=Tb2YL-aCg7c"
+            }
+          },
+          "author": {
+            "name": "Crazy Clones AI",
+            "uri": "https://www.youtube.com/channel/UC1PsYPhJWpgcM88C4txYp1Q"
+          },
+          "published": "2025-02-28T23:58:41+00:00",
+          "updated": "2025-02-28T23:59:32.182345149+00:00"
+        }
+      }
     },
-    "timestamp": "2023-05-05T10:35:00Z"
-  }'
+    "webhookUrl": "https://your-webhook-domain.com/webhook/path",
+    "executionMode": "production"
+  }
+]'
 ```
 
 <Note>
   Your webhook endpoint should respond with a 2xx status code (e.g., 200 OK) to acknowledge receipt of the notification. If your endpoint returns a non-2xx status code, the system will log an error but will not retry the notification.
-</Note> 
+</Note>
+
+## Example: Processing Notifications in JavaScript
+
+Here's an example of how to process the notification data in JavaScript:
+
+```javascript
+app.post('/webhook', (req, res) => {
+  try {
+    const notification = req.body[0];
+    
+    // Extract key information
+    const videoTitle = notification.body.feed.entry.title;
+    const channelName = notification.body.feed.entry.author.name;
+    const videoUrl = notification.body.feed.entry.link.$.href;
+    const videoId = notification.body.feed.entry['yt:videoid'];
+    const channelId = notification.body.feed.entry['yt:channelid'];
+    const publishedDate = notification.body.feed.entry.published;
+    
+    console.log(`New video "${videoTitle}" by ${channelName}: ${videoUrl}`);
+    
+    // Process the notification (e.g., send to a database, trigger an alert, etc.)
+    // ...
+    
+    // Acknowledge receipt of the notification
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Error processing notification:', error);
+    res.status(500).send('Error processing notification');
+  }
+});
+``` 
