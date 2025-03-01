@@ -106,70 +106,9 @@ For more details, see the [N8N Integration](/n8n-integration/getting-started) se
 
 ## Testing Notifications
 
-To test your webhook endpoint, you can use the following cURL command to simulate a notification:
+You can test your webhook endpoint [here](https://youtube-notifier-test.vercel.app/) , simply enter your webhook URL and click test to simulate an incoming notification.
 
-```bash
-curl --request POST \
-  --url 'https://your-webhook-url.com/endpoint' \
-  --header 'Content-Type: application/json' \
-  --data-raw '[
-  {
-    "headers": {
-      "host": "your-webhook-domain.com",
-      "user-agent": "FeedFetcher-Google; (+http://www.google.com/feedfetcher.html)",
-      "content-length": "879",
-      "content-type": "application/atom+xml",
-      "link": "<https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC1PsYPhJWpgcM88C4txYp1Q>; rel=self, <http://pubsubhubbub.appspot.com/>; rel=hub"
-    },
-    "params": {},
-    "query": {},
-    "body": {
-      "feed": {
-        "$": {
-          "xmlns:yt": "http://www.youtube.com/xml/schemas/2015",
-          "xmlns": "http://www.w3.org/2005/Atom"
-        },
-        "link": [
-          {
-            "$": {
-              "rel": "hub",
-              "href": "https://pubsubhubbub.appspot.com"
-            }
-          },
-          {
-            "$": {
-              "rel": "self",
-              "href": "https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC1PsYPhJWpgcM88C4txYp1Q"
-            }
-          }
-        ],
-        "title": "YouTube video feed",
-        "updated": "2025-02-28T23:59:32.182345149+00:00",
-        "entry": {
-          "id": "yt:video:Tb2YL-aCg7c",
-          "yt:videoid": "Tb2YL-aCg7c",
-          "yt:channelid": "UC1PsYPhJWpgcM88C4txYp1Q",
-          "title": "AI Solution Demo",
-          "link": {
-            "$": {
-              "rel": "alternate",
-              "href": "https://www.youtube.com/watch?v=Tb2YL-aCg7c"
-            }
-          },
-          "author": {
-            "name": "Crazy Clones AI",
-            "uri": "https://www.youtube.com/channel/UC1PsYPhJWpgcM88C4txYp1Q"
-          },
-          "published": "2025-02-28T23:58:41+00:00",
-          "updated": "2025-02-28T23:59:32.182345149+00:00"
-        }
-      }
-    },
-    "webhookUrl": "https://your-webhook-domain.com/webhook/path",
-    "executionMode": "production"
-  }
-]'
-```
+
 
 <Note>
   Your webhook endpoint should respond with a 2xx status code (e.g., 200 OK) to acknowledge receipt of the notification. If your endpoint returns a non-2xx status code, the system will log an error but will not retry the notification.
