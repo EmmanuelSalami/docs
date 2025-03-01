@@ -1,0 +1,133 @@
+---
+title: 'Getting Started with N8N'
+description: 'Learn how to set up the YouTube Notification System with N8N'
+---
+
+# Getting Started with N8N
+
+N8N is a powerful workflow automation tool that allows you to connect various services and automate workflows without coding. The YouTube Notification System has built-in support for N8N, making it easy to receive notifications when new videos are uploaded to your favorite YouTube channels.
+
+## What is N8N?
+
+[N8N](https://n8n.io/) is an open-source workflow automation tool that helps you connect different services and automate tasks. It provides a visual interface for creating workflows, making it accessible to users without programming experience.
+
+## Why Use N8N with YouTube Notification System?
+
+Using N8N with the YouTube Notification System offers several advantages:
+
+1. **Simplified Setup**: Our system automatically handles all the complex parts of YouTube subscriptions.
+2. **Workflow Automation**: Process YouTube notifications and trigger actions in other services.
+3. **Data Transformation**: Transform notification data into the format required by other services.
+4. **Conditional Logic**: Create complex workflows with conditional logic based on video metadata.
+5. **Integration with Other Services**: Connect YouTube notifications to hundreds of other services like Slack, Discord, Email, and more.
+
+## Setting Up N8N
+
+### Step 1: Install N8N
+
+You can install N8N in several ways:
+
+- **Cloud**: Sign up for [N8N Cloud](https://www.n8n.cloud/)
+- **Desktop App**: Download the [N8N Desktop App](https://n8n.io/download/)
+- **Self-hosted**: Follow the [self-hosting instructions](https://docs.n8n.io/hosting/)
+
+### Step 2: Create a New Workflow
+
+1. Open N8N and click on "Workflows" in the sidebar
+2. Click "Create New Workflow"
+3. Give your workflow a name, such as "YouTube Notifications"
+
+### Step 3: Add a Webhook Node
+
+1. Click the "+" button to add a node
+2. Search for "Webhook" and select it
+3. Configure the Webhook node:
+   - Set "Authentication" to "None"
+   - Set "HTTP Method" to "POST"
+   - Click "Add Option" and select "Response Mode"
+   - Set "Response Mode" to "Last Node"
+   - Click "Add Option" and select "Response Code"
+   - Set "Response Code" to "200"
+   - Click "Add Option" and select "Response Data"
+   - Set "Response Data" to "success"
+
+4. Click "Execute Node" to activate the webhook
+5. Copy the webhook URL (it should look like `https://your-n8n-instance.com/webhook/youtube-notifications`)
+
+### Step 4: Subscribe to YouTube Channels
+
+Use the webhook URL from Step 3 to subscribe to YouTube channels using our API:
+    
+    ```bash
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "webhookUrl": "https://your-n8n-instance.com/webhook/youtube-notifications",
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw", "UCsvqVGtbbyHaMoevxPAq9Fg"]
+  }'
+```
+
+### Step 5: Process Notifications
+
+Now you can add nodes to process the YouTube notifications:
+
+1. Add nodes after the Webhook node to process the data
+2. Use the "JSON Parse" node if you need to parse the notification data
+3. Add conditional logic using the "IF" node
+4. Connect to other services using their respective nodes
+
+## Example Workflow: Send YouTube Notifications to Discord
+
+Here's a simple example of how to send YouTube notifications to a Discord channel:
+
+1. Start with the Webhook node as described above
+2. Add a "Discord" node:
+   - Set "Resource" to "Message"
+   - Set "Operation" to "Send"
+   - Configure your Discord credentials
+   - Set "Channel" to your Discord channel ID
+   - Set "Content" to a message using the data from the webhook, for example:
+     ```
+     New video from {{$json.channel.name}}: {{$json.video.title}}
+     Watch here: {{$json.video.url}}
+     ```
+
+3. Save and activate the workflow
+
+Now, whenever a new video is uploaded to one of the subscribed channels, N8N will receive the notification and send a message to your Discord channel.
+
+## N8N Dual Webhook Support
+
+Our system provides special support for N8N webhooks:
+
+1. **Automatic Detection**: We automatically detect N8N webhook URLs (containing "webhook-test")
+2. **Dual Webhook Support**: When you subscribe using an N8N test webhook URL, we automatically create a subscription for the corresponding production webhook URL
+3. **Bidirectional Forwarding**: Notifications are sent to both test and production webhooks, ensuring you don't miss any during development
+
+This means you can develop and test your workflows in N8N's test environment, and when you're ready to move to production, your subscriptions will already be set up.
+
+## Advanced N8N Features
+
+Once you're comfortable with the basics, you can explore more advanced N8N features:
+
+- **Error Handling**: Add error handling nodes to manage failures
+- **Scheduled Triggers**: Add scheduled triggers to check subscription status periodically
+- **Data Mapping**: Use the "Function" node for complex data transformations
+- **Multiple Webhooks**: Create multiple workflows for different YouTube channels
+- **Persistent Data**: Use the "Set" node to store data between executions
+
+## Troubleshooting
+
+If you're having issues with your N8N integration, check these common problems:
+
+1. **Webhook URL Accessibility**: Ensure your N8N instance is publicly accessible
+2. **Workflow Activation**: Make sure your workflow is activated
+3. **Node Configuration**: Verify that all nodes are configured correctly
+4. **Execution Logs**: Check the execution logs in N8N for errors
+
+For more help, see our [Troubleshooting Guide](/troubleshooting) or contact support.
+
+<Note>
+  Remember to keep your N8N instance running to receive notifications. If you're using the desktop app or a self-hosted instance, make sure it stays online.
+</Note> 

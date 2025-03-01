@@ -1,0 +1,259 @@
+---
+title: 'N8N Workflow Examples'
+description: 'Example workflows for integrating the YouTube Notification System with N8N'
+---
+
+# N8N Workflow Examples
+
+This page provides detailed examples of workflows you can create with the YouTube Notification System and N8N. Each example includes a step-by-step guide and a downloadable workflow file.
+
+## Slack Notification Workflow
+
+This workflow sends a notification to a Slack channel whenever a new video is uploaded to a subscribed YouTube channel.
+
+<Frame>
+  <img src="/images/n8n-slack-workflow-detailed.png" alt="N8N Slack Workflow" />
+</Frame>
+
+### Components
+
+1. **Webhook Node**: Receives the notification from YouTube Notification System
+2. **Function Node**: Formats the notification for Slack
+3. **Slack Node**: Sends the notification to a Slack channel
+
+### Setup Instructions
+
+<Steps>
+  <Step title="Create the webhook node">
+    1. Add a new "Webhook" node to your workflow.
+    2. Set the method to "POST".
+    3. Copy the webhook URL and configure it in your YouTube Notification System dashboard.
+  </Step>
+  
+  <Step title="Add the function node">
+    1. Add a new "Function" node to your workflow.
+    2. Connect it to the "Webhook" node.
+    3. Add the following code to format the notification for Slack:
+    
+    ```javascript
+    const video = items[0].json.video;
+    const channel = items[0].json.channel;
+    
+    return [
+      {
+        json: {
+          blocks: [
+            {
+              type: "header",
+              text: {
+                type: "plain_text",
+                text: "🎬 New YouTube Video",
+                emoji: true
+              }
+            },
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `*${video.title}*\nUploaded by ${channel.title}`
+              },
+              accessory: {
+                type: "image",
+                image_url: video.thumbnail,
+                alt_text: video.title
+              }
+            },
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: video.description.substring(0, 100) + "..."
+              }
+            },
+            {
+              type: "actions",
+              elements: [
+                {
+                  type: "button",
+                  text: {
+                    type: "plain_text",
+                    text: "Watch Video",
+                    emoji: true
+                  },
+                  url: video.url
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ];
+    ```
+  </Step>
+  
+  <Step title="Add the Slack node">
+    1. Add a new "Slack" node to your workflow.
+    2. Connect it to the "Function" node.
+    3. Configure the Slack node with your Slack credentials.
+    4. Set the channel where you want to send the notification.
+    5. Set the "Message" field to use the output from the Function node.
+  </Step>
+  
+  <Step title="Activate the workflow">
+    1. Click the "Activate" button to enable the workflow.
+    2. Test the workflow by sending a test notification from your YouTube Notification System dashboard.
+  </Step>
+</Steps>
+
+<Card title="Download Workflow" icon="download" href="https://www.skool.com/ai-automation-blueprint/about">
+  Access the complete Slack notification workflow in our Skool community
+</Card>
+
+## Email Digest Workflow
+
+This workflow collects video notifications throughout the day and sends a daily digest email with all the new videos.
+
+<Frame>
+  <img src="/images/n8n-email-digest-workflow.png" alt="N8N Email Digest Workflow" />
+</Frame>
+
+### Components
+
+1. **Webhook Node**: Receives the notification from YouTube Notification System
+2. **Google Sheets Node**: Stores the video information
+3. **Schedule Trigger Node**: Triggers the digest email at a specific time
+4. **Google Sheets Node**: Retrieves the stored video information
+5. **Function Node**: Formats the email content
+6. **Email Node**: Sends the digest email
+7. **Google Sheets Node**: Clears the stored video information
+
+### Setup Instructions
+
+<Steps>
+  <Step title="Create the webhook node">
+    1. Add a new "Webhook" node to your workflow.
+    2. Set the method to "POST".
+    3. Copy the webhook URL and configure it in your YouTube Notification System dashboard.
+  </Step>
+  
+  <Step title="Add the Google Sheets node for storing videos">
+    1. Add a new "Google Sheets" node to your workflow.
+    2. Connect it to the "Webhook" node.
+    3. Configure it to append a row to a spreadsheet with the video information.
+    4. Create a spreadsheet with columns for video title, channel, URL, thumbnail, and publish date.
+  </Step>
+  
+  <Step title="Add the schedule trigger node">
+    1. Add a new "Schedule Trigger" node to your workflow.
+    2. Configure it to run at your preferred time (e.g., 5:00 PM daily).
+  </Step>
+  
+  <Step title="Add the Google Sheets node for retrieving videos">
+    1. Add a new "Google Sheets" node to your workflow.
+    2. Connect it to the "Schedule Trigger" node.
+    3. Configure it to read all rows from the spreadsheet.
+  </Step>
+  
+  <Step title="Add the function node">
+    1. Add a new "Function" node to your workflow.
+    2. Connect it to the "Google Sheets" node.
+    3. Add code to format the email content with all the videos.
+  </Step>
+  
+  <Step title="Add the email node">
+    1. Add a new "Email" node to your workflow.
+    2. Connect it to the "Function" node.
+    3. Configure it with your email service credentials.
+    4. Set the recipient, subject, and body using the output from the Function node.
+  </Step>
+  
+  <Step title="Add the Google Sheets node for clearing data">
+    1. Add a new "Google Sheets" node to your workflow.
+    2. Connect it to the "Email" node.
+    3. Configure it to clear all rows from the spreadsheet except the header row.
+  </Step>
+  
+  <Step title="Activate the workflow">
+    1. Click the "Activate" button to enable the workflow.
+    2. Test the workflow by sending a test notification and then manually triggering the schedule node.
+  </Step>
+</Steps>
+
+<Card title="Download Workflow" icon="download" href="https://www.skool.com/ai-automation-blueprint/about">
+  Access the complete email digest workflow in our Skool community
+</Card>
+
+## Discord Bot Workflow
+
+This workflow sends notifications to a Discord channel using a Discord bot whenever a new video is uploaded.
+
+<Frame>
+  <img src="/images/n8n-discord-workflow.png" alt="N8N Discord Workflow" />
+</Frame>
+
+### Components
+
+1. **Webhook Node**: Receives the notification from YouTube Notification System
+2. **Function Node**: Formats the notification for Discord
+3. **Discord Node**: Sends the notification to a Discord channel
+
+### Setup Instructions
+
+<Steps>
+  <Step title="Create the webhook node">
+    1. Add a new "Webhook" node to your workflow.
+    2. Set the method to "POST".
+    3. Copy the webhook URL and configure it in your YouTube Notification System dashboard.
+  </Step>
+  
+  <Step title="Add the function node">
+    1. Add a new "Function" node to your workflow.
+    2. Connect it to the "Webhook" node.
+    3. Add code to format the notification for Discord.
+  </Step>
+  
+  <Step title="Add the Discord node">
+    1. Add a new "Discord" node to your workflow.
+    2. Connect it to the "Function" node.
+    3. Configure it with your Discord bot token.
+    4. Set the channel where you want to send the notification.
+  </Step>
+  
+  <Step title="Activate the workflow">
+    1. Click the "Activate" button to enable the workflow.
+    2. Test the workflow by sending a test notification from your YouTube Notification System dashboard.
+  </Step>
+</Steps>
+
+<Card title="Download Workflow" icon="download" href="https://www.skool.com/ai-automation-blueprint/about">
+  Access the complete Discord bot workflow in our Skool community
+</Card>
+
+## Creating Your Own Workflows
+
+These examples are just a starting point. You can create your own workflows to suit your specific needs. Here are some ideas:
+
+- Send notifications to other platforms like Microsoft Teams, Telegram, or WhatsApp
+- Save video information to a database for later analysis
+- Create social media posts when new videos are uploaded
+- Generate and send reports on video performance
+- Trigger other automation tools like Zapier or IFTTT
+
+For more information on creating workflows in N8N, see the [N8N documentation](https://docs.n8n.io/).
+
+<CardGroup cols={2}>
+  <Card
+    title="Getting Started"
+    icon="rocket"
+    href="/n8n-integration/getting-started"
+  >
+    Learn the basics of integrating with N8N
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    Explore the YouTube Notification System API
+  </Card>
+</CardGroup> 

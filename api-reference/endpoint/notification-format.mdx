@@ -1,0 +1,114 @@
+---
+title: 'Notification Format'
+description: 'Learn about the notification format sent to your webhook'
+---
+
+# Notification Format
+
+When a new video is uploaded to a subscribed YouTube channel, the system sends a notification to your webhook URL. This page describes the format of these notifications.
+
+## Standard Notification Format
+
+The notification is sent as a JSON payload in the body of a POST request to your webhook URL. The payload contains information about the new video and the channel that uploaded it.
+
+```json
+{
+  "event": "youtube.video.published",
+  "video": {
+    "id": "dQw4w9WgXcQ",
+    "title": "Video Title",
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "published_at": "2023-05-05T10:30:00Z",
+    "updated_at": "2023-05-05T10:30:00Z"
+  },
+  "channel": {
+    "id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "name": "Channel Name"
+  },
+  "timestamp": "2023-05-05T10:35:00Z"
+}
+```
+
+## Field Descriptions
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `event` | string | The type of event. Always `youtube.video.published` for new video notifications. |
+| `video.id` | string | The YouTube video ID. |
+| `video.title` | string | The title of the video. |
+| `video.url` | string | The full URL to the video on YouTube. |
+| `video.published_at` | string | The date and time when the video was published, in ISO 8601 format. |
+| `video.updated_at` | string | The date and time when the video was last updated, in ISO 8601 format. |
+| `channel.id` | string | The YouTube channel ID. |
+| `channel.name` | string | The name of the channel. |
+| `timestamp` | string | The date and time when the notification was sent, in ISO 8601 format. |
+
+## Original YouTube Data
+
+The notification format is a simplified version of the original Atom XML feed data sent by YouTube. The system parses this XML data and converts it to a more user-friendly JSON format.
+
+Here's an example of the original Atom XML feed data from YouTube:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://www.w3.org/2005/Atom">
+  <link rel="hub" href="https://pubsubhubbub.appspot.com"/>
+  <link rel="self" href="https://www.youtube.com/xml/feeds/videos.xml?channel_id=UC_x5XG1OV2P6uZZ5FSM9Ttw"/>
+  <title>YouTube video feed</title>
+  <updated>2023-05-05T10:30:00Z</updated>
+  <entry>
+    <id>yt:video:dQw4w9WgXcQ</id>
+    <yt:videoId>dQw4w9WgXcQ</yt:videoId>
+    <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+    <title>Video Title</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"/>
+    <author>
+      <name>Channel Name</name>
+      <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+    </author>
+    <published>2023-05-05T10:30:00Z</published>
+    <updated>2023-05-05T10:30:00Z</updated>
+  </entry>
+</feed>
+```
+
+## Handling Notifications in N8N
+
+If you're using N8N, you can create a workflow that starts with a Webhook node to receive these notifications. Here's how to set it up:
+
+1. Create a new workflow in N8N
+2. Add a Webhook node as the trigger
+3. Configure the Webhook node to receive POST requests
+4. Use the webhook URL provided by N8N when subscribing to YouTube channels
+5. Add nodes to process the notification data as needed
+
+For more details, see the [N8N Integration](/n8n-integration/getting-started) section.
+
+## Testing Notifications
+
+To test your webhook endpoint, you can use the following cURL command to simulate a notification:
+
+```bash
+curl --request POST \
+  --url 'https://your-webhook-url.com/endpoint' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "event": "youtube.video.published",
+    "video": {
+      "id": "dQw4w9WgXcQ",
+      "title": "Test Video",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "published_at": "2023-05-05T10:30:00Z",
+      "updated_at": "2023-05-05T10:30:00Z"
+    },
+    "channel": {
+      "id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      "name": "Test Channel"
+    },
+    "timestamp": "2023-05-05T10:35:00Z"
+  }'
+```
+
+<Note>
+  Your webhook endpoint should respond with a 2xx status code (e.g., 200 OK) to acknowledge receipt of the notification. If your endpoint returns a non-2xx status code, the system will log an error but will not retry the notification.
+</Note> 

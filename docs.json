@@ -1,35 +1,30 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "YouTube Notification System",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#8A2BE2",
+    "light": "#A569BD",
+    "dark": "#6A0DAD"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.ico",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Getting Started",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Overview",
             "pages": [
+              "index",
               "introduction",
-              "quickstart",
-              "development"
+              "quickstart"
             ]
           },
           {
-            "group": "Essentials",
+            "group": "Development",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              
             ]
           }
         ]
@@ -44,12 +39,24 @@
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Endpoints",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/endpoint/subscribe",
+              "api-reference/endpoint/subscription-status",
+              "api-reference/endpoint/unsubscribe",
+              "api-reference/endpoint/notification-format"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "N8N Integration",
+        "groups": [
+          {
+            "group": "Integration Guide",
+            "pages": [
+              "n8n-integration/getting-started",
+              "n8n-integration/workflow-examples"
             ]
           }
         ]
@@ -58,45 +65,33 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Skool Community",
+          "href": "https://www.skool.com/ai-automation-blueprint/about",
+          "icon": "plug"
         }
       ]
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "dark": "/logo/logo-text.png",
+    "light": "/logo/logo-text.png"
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "https://www.skool.com/ai-automation-blueprint/about"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "skool",
+      "href": "https://www.skool.com/ai-automation-blueprint/about"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "discord": "https://www.skool.com/ai-automation-blueprint/about"
     }
   }
 }

@@ -1,71 +1,88 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: 'Introduction'
+description: 'Get started with the YouTube Notification System'
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.png"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.png"
-  alt="Hero Dark"
-/>
+# YouTube Notification System
 
-## Setting up
+The YouTube Notification System is a powerful API that allows you to receive real-time notifications when new videos are uploaded to your favorite YouTube channels. This documentation will help you get started with the API and show you how to integrate it into your applications.
 
-The first step to world-class documentation is setting up your editing environments.
+## How It Works
 
-<CardGroup cols={2}>
-  <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Get your docs set up locally for easy development
-  </Card>
-  <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
-  >
-    Preview your changes before you push to make sure they're perfect
-  </Card>
-</CardGroup>
+The YouTube Notification System uses YouTube's PubSubHubbub (WebSub) protocol to subscribe to channel updates. Here's how it works:
 
-## Make it yours
+1. **Subscribe**: You provide a webhook URL and a list of YouTube channel IDs to our API.
+2. **Verification**: Our system registers your subscription with YouTube's PubSubHubbub hub and handles all verification automatically.
+3. **Notification**: When a new video is uploaded to one of the subscribed channels, YouTube sends a notification to our system, which we then forward to your webhook URL.
+4. **Processing**: Your webhook endpoint receives the notification and can process it according to your needs.
 
-Update your docs to your brand and add valuable content for the best user conversion.
+## Key Features
 
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
-  </Card>
-  <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
-  >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
-  >
-    Check out our showcase of our favorite documentation
-  </Card>
-</CardGroup>
+- **Real-time Notifications**: Receive notifications as soon as new videos are uploaded.
+- **Multiple Channels**: Subscribe to multiple YouTube channels with a single webhook URL.
+- **Subscription Management**: Add or remove channels from your subscription as needed.
+- **Subscription Status**: Check the status of your subscriptions at any time.
+- **N8N Integration**: Built-in support for N8N workflows, including automatic dual webhook support.
+- **Simple API**: Easy-to-use REST API with clear documentation.
+
+## Getting Started
+
+To get started with the YouTube Notification System, follow these steps:
+
+1. **Subscribe to Channels**: Use the [Subscribe endpoint](/api-reference/endpoint/subscribe) to subscribe to YouTube channels.
+2. **Check Subscription Status**: Use the [Subscription Status endpoint](/api-reference/endpoint/subscription-status) to verify that your subscription is active.
+3. **Handle Notifications**: Set up your webhook endpoint to receive and process notifications.
+4. **Manage Subscriptions**: Add or remove channels as needed using the [Subscribe](/api-reference/endpoint/subscribe) and [Unsubscribe](/api-reference/endpoint/unsubscribe) endpoints.
+
+## Example: Subscribing to Channels
+
+Here's a simple example of how to subscribe to YouTube channels using cURL:
+
+```bash
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "webhookUrl": "https://your-webhook-url.com/endpoint",
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw", "UCsvqVGtbbyHaMoevxPAq9Fg"]
+  }'
+```
+
+## Example: Receiving Notifications
+
+When a new video is uploaded to a subscribed channel, your webhook will receive a notification like this:
+
+```json
+{
+  "event": "youtube.video.published",
+  "video": {
+    "id": "dQw4w9WgXcQ",
+    "title": "Video Title",
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "published_at": "2023-05-05T10:30:00Z",
+    "updated_at": "2023-05-05T10:30:00Z"
+  },
+  "channel": {
+    "id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "name": "Channel Name"
+  },
+  "timestamp": "2023-05-05T10:35:00Z"
+}
+```
+
+## N8N Integration
+
+The YouTube Notification System has built-in support for N8N, a powerful workflow automation tool. With N8N, you can easily create workflows that process YouTube notifications and trigger actions in other services.
+
+To learn more about using N8N with the YouTube Notification System, see the [N8N Integration](/n8n-integration/getting-started) section.
+
+## API Reference
+
+The YouTube Notification System provides a simple REST API for managing subscriptions and receiving notifications. The API endpoints are documented in the [API Reference](/api-reference/endpoint/subscribe) section.
+
+## Need Help?
+
+If you have any questions or need help with the YouTube Notification System, join our [skool community](https://www.skool.com/ai-automation-blueprint/about) for full support.
+<Note>
+  Remember to renew your subscriptions regularly, as YouTube's PubSubHubbub hub automatically expires subscriptions after a certain period (typically 10 days).
+</Note>

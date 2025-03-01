@@ -1,0 +1,168 @@
+---
+title: 'Subscription Status'
+description: 'Check the status of your YouTube channel subscriptions'
+---
+
+# Subscription Status
+
+The Subscription Status endpoint allows you to check the status of your YouTube channel subscriptions. You can use this to verify if your subscriptions are active and when they will expire.
+
+## Check Subscription Status
+
+<ParamField query="webhookUrl" type="string" required>
+  The webhook URL you used when subscribing to channels. This is used to find your subscriptions.
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl --request GET \
+  --url 'https://youtube-notifier.vercel.app/api/subscription-status?webhookUrl=https://your-webhook-url.com/endpoint'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "webhookUrl": "https://your-webhook-url.com/endpoint",
+  "userKey": "abc123def456ghij",
+  "callbackUrl": "https://youtube-notifier.vercel.app/api/websub/abc123def456ghij",
+  "overallStatus": "all verified",
+  "channels": [
+    {
+      "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      "state": "verified",
+      "expiration": "2023-05-15T10:30:00Z",
+      "lastVerification": "2023-05-05T10:30:00Z",
+      "lastSubscribe": "2023-05-05T10:29:45Z",
+      "verificationError": null,
+      "isSubscribed": true
+    },
+    {
+      "channelId": "UCsvqVGtbbyHaMoevxPAq9Fg",
+      "state": "verified",
+      "expiration": "2023-05-15T10:35:00Z",
+      "lastVerification": "2023-05-05T10:35:00Z",
+      "lastSubscribe": "2023-05-05T10:34:45Z",
+      "verificationError": null,
+      "isSubscribed": true
+    }
+  ]
+}
+```
+</ResponseExample>
+
+## N8N Dual Webhook Status
+
+If you're using N8N, the system automatically detects N8N webhook URLs and provides status information for both test and production webhooks in a single response.
+
+<RequestExample>
+```bash cURL
+curl --request GET \
+  --url 'https://youtube-notifier.vercel.app/api/subscription-status?webhookUrl=https://your-n8n-instance.com/webhook-test/youtube'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "webhookUrl": "https://your-n8n-instance.com/webhook-test/youtube",
+  "userKey": "abc123def456ghij",
+  "callbackUrl": "https://youtube-notifier.vercel.app/api/websub/abc123def456ghij",
+  "overallStatus": "all verified",
+  "channels": [
+    {
+      "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      "state": "verified",
+      "expiration": "2023-05-15T10:30:00Z",
+      "lastVerification": "2023-05-05T10:30:00Z",
+      "lastSubscribe": "2023-05-05T10:29:45Z",
+      "verificationError": null,
+      "isSubscribed": true
+    }
+  ],
+  "relatedWebhook": {
+    "webhookUrl": "https://your-n8n-instance.com/webhook/youtube",
+    "userKey": "klm789nop012qrs",
+    "callbackUrl": "https://youtube-notifier.vercel.app/api/websub/klm789nop012qrs",
+    "overallStatus": "all verified",
+    "channels": [
+      {
+        "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        "state": "verified",
+        "expiration": "2023-05-15T10:30:00Z",
+        "lastVerification": "2023-05-05T10:30:00Z",
+        "lastSubscribe": "2023-05-05T10:29:45Z",
+        "verificationError": null,
+        "isSubscribed": true
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+## Possible Subscription States
+
+The `state` field in the response can have the following values:
+
+| State | Description |
+| ----- | ----------- |
+| `verified` | The subscription is active and verified. You will receive notifications for new videos. |
+| `not verified` | The subscription request was sent but not yet verified by YouTube. |
+| `verification failed` | YouTube attempted to verify the subscription but failed. |
+| `expired` | The subscription has expired and needs to be renewed. |
+| `not found` | No subscription was found for this channel. |
+| `error` | An error occurred while checking the subscription status. |
+
+## Error Responses
+
+### Webhook URL Not Found (404)
+
+<ResponseExample>
+```json Response (404 Not Found)
+{
+  "success": false,
+  "error": "No subscriptions found for this webhook URL",
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
+</ResponseExample>
+
+### Missing Webhook URL (400)
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "error": "webhookUrl query parameter is required"
+}
+```
+</ResponseExample>
+
+### Invalid Webhook URL Format (400)
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "error": "Invalid webhook URL format",
+  "webhookUrl": "not-a-valid-url"
+}
+```
+</ResponseExample>
+
+### Server Error (500)
+
+<ResponseExample>
+```json Response (500 Internal Server Error)
+{
+  "success": false,
+  "error": "An error occurred while checking subscription status",
+  "details": "Error communicating with YouTube's PubSubHubbub hub"
+}
+```
+</ResponseExample>
+
+<Note>
+  Subscription status is checked directly with YouTube's PubSubHubbub hub. The response includes the actual status from YouTube, not just what's stored in our database.
+</Note> 

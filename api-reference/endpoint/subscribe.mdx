@@ -1,0 +1,233 @@
+---
+title: 'Subscribe'
+description: 'Subscribe to YouTube channel notifications'
+---
+
+# Subscribe
+
+The Subscribe endpoint allows you to subscribe to YouTube channel notifications. When a new video is uploaded to a subscribed channel, a notification will be sent to your specified webhook URL.
+
+## Endpoint
+
+```
+POST /api/subscribe
+```
+
+## Request Parameters
+
+<ParamField body="channelIds" type="array" required>
+  An array of YouTube channel IDs to subscribe to. Each channel ID should start with "UC" and be 24 characters long.
+</ParamField>
+
+<ParamField body="webhookUrl" type="string" required>
+  The URL where notifications should be sent when new videos are uploaded. This must be a valid URL that can receive POST requests.
+</ParamField>
+
+## Subscribe to Channels
+
+<RequestExample>
+```bash cURL
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+    "webhookUrl": "https://your-webhook-url.com/endpoint"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response (200 OK)
+{
+  "success": true,
+  "userKey": "abc123def456ghij",
+  "message": "Subscribed successfully",
+  "newlySubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
+</ResponseExample>
+
+## Add Channels to Existing Subscription
+
+If you already have a subscription and want to add more channels to it, you can use the same endpoint with the same webhook URL. The system will detect the existing subscription and add only the new channels.
+
+<RequestExample>
+```bash cURL
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "channelIds": ["UCsvqVGtbbyHaMoevxPAq9Fg"],
+    "webhookUrl": "https://your-webhook-url.com/endpoint"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response (200 OK)
+{
+  "success": true,
+  "userKey": "abc123def456ghij",
+  "message": "Subscription updated successfully",
+  "newlySubscribedChannels": ["UCsvqVGtbbyHaMoevxPAq9Fg"],
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
+</ResponseExample>
+
+## Renew Subscriptions
+
+YouTube PubSubHubbub subscriptions expire after approximately 10 days. You can use the same endpoint to renew your subscriptions by providing the same channel IDs and webhook URL.
+
+<RequestExample>
+```bash cURL
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw", "UCsvqVGtbbyHaMoevxPAq9Fg"],
+    "webhookUrl": "https://your-webhook-url.com/endpoint"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response (200 OK)
+{
+  "success": true,
+  "userKey": "abc123def456ghij",
+  "message": "All channels have been resubscribed",
+  "resubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw", "UCsvqVGtbbyHaMoevxPAq9Fg"],
+  "resubscriptionResults": [
+    {
+      "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      "success": true
+    },
+    {
+      "channelId": "UCsvqVGtbbyHaMoevxPAq9Fg",
+      "success": true
+    }
+  ],
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
+</ResponseExample>
+
+## N8N Dual Webhook Support
+
+If you're using N8N, the system automatically detects N8N webhook URLs (containing "webhook-test") and provides dual webhook support. When you subscribe using an N8N test webhook URL, the system will automatically create a subscription for the corresponding production webhook URL as well.
+
+<RequestExample>
+```bash cURL
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+    "webhookUrl": "https://your-n8n-instance.com/webhook-test/youtube"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response (200 OK)
+{
+  "success": true,
+  "userKey": "abc123def456ghij",
+  "message": "Subscribed successfully",
+  "newlySubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+  "webhookUrl": "https://your-n8n-instance.com/webhook-test/youtube",
+  "dualSubscription": {
+    "productionWebhookUrl": "https://your-n8n-instance.com/webhook/youtube",
+    "success": true,
+    "userKey": "klm789nop012qrs",
+    "message": "Subscribed successfully",
+    "newlySubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"]
+  }
+}
+```
+</ResponseExample>
+
+## Error Responses
+
+### Method Not Allowed (405)
+
+If you use any HTTP method other than POST:
+
+<ResponseExample>
+```json Response (405 Method Not Allowed)
+{
+  "success": false,
+  "message": "Method not allowed. Please use POST."
+}
+```
+</ResponseExample>
+
+### Invalid Channel IDs (400)
+
+If the `channelIds` parameter is missing, not an array, or empty:
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "message": "channelIds must be a non-empty array of YouTube channel IDs"
+}
+```
+</ResponseExample>
+
+### Invalid Channel ID Format (400)
+
+If any of the channel IDs are not in the correct YouTube format (starting with "UC" and 24 characters long):
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "message": "One or more channel IDs are not in the correct YouTube format",
+  "invalidChannelIds": ["invalid-channel-id"]
+}
+```
+</ResponseExample>
+
+### Invalid Webhook URL (400)
+
+If the `webhookUrl` parameter is missing or not a valid URL:
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "message": "webhookUrl must be a valid URL"
+}
+```
+</ResponseExample>
+
+### Server Error (500)
+
+If an unexpected error occurs during processing:
+
+<ResponseExample>
+```json Response (500 Internal Server Error)
+{
+  "success": false,
+  "message": "An unexpected error occurred",
+  "error": "Error message details"
+}
+```
+</ResponseExample>
+
+## Response Messages
+
+The API returns different messages depending on the operation:
+
+1. **New Subscription**: "Subscribed successfully"
+2. **Adding New Channels + Resubscribing Existing Channels**: "Subscription updated with new channels and existing channels resubscribed"
+3. **Adding New Channels Only**: "Subscription updated successfully"
+4. **Resubscribing Existing Channels Only**: "All channels have been resubscribed"
+
+<Note>
+  YouTube PubSubHubbub subscriptions expire after approximately 10 days. Make sure to renew your subscriptions regularly to ensure you continue receiving notifications. You can set up an N8N workflow to automatically renew your subscriptions every 9 days.
+</Note> 

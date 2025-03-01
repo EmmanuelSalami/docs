@@ -1,0 +1,166 @@
+---
+title: 'Troubleshooting Guide'
+description: 'Solutions for common issues with the YouTube Notification System'
+---
+
+# Troubleshooting Guide
+
+This guide covers common issues you might encounter when using the YouTube Notification System and provides solutions to help you resolve them.
+
+## Subscription Issues
+
+### Subscription Verification Failed
+
+**Symptoms:**
+- You receive an error message indicating that subscription verification failed
+- The subscription status shows "verification failed"
+
+**Possible Causes and Solutions:**
+
+1. **Webhook URL is not publicly accessible**
+   - Ensure your webhook URL is accessible from the internet
+   - If using a local development environment, consider using a service like ngrok to expose your local server
+
+2. **Firewall or security settings**
+   - Ensure your server allows incoming POST requests from our notification system
+   - Check if there are any firewall rules blocking requests from our servers
+
+3. **Webhook timeout**
+   - Your webhook must respond quickly (within a few seconds)
+   - Optimize your webhook to respond faster to incoming requests
+
+<Note>
+  Remember that our system handles all webhook verification with YouTube automatically. Your webhook only needs to be able to receive POST requests with notification data.
+</Note>
+
+### Subscription Expired
+
+**Symptoms:**
+- You stop receiving notifications for a channel
+- The subscription status shows "expired"
+
+**Solutions:**
+- Renew the subscription using the [Subscribe endpoint](/api-reference/endpoint/subscribe)
+- Set up automatic renewal by periodically calling the Subscribe endpoint with the same parameters
+
+### Invalid Channel ID
+
+**Symptoms:**
+- You receive an error when trying to subscribe to a channel
+- The error message indicates an invalid channel ID
+
+**Solutions:**
+- Ensure you're using the correct channel ID format (e.g., `UC_x5XG1OV2P6uZZ5FSM9Ttw`)
+- To find a channel ID:
+  1. Go to the YouTube channel page
+  2. View the page source (right-click and select "View Page Source")
+  3. Search for "channelId"
+  4. The channel ID starts with "UC" followed by 22 characters
+
+## Notification Issues
+
+### Not Receiving Notifications
+
+**Symptoms:**
+- New videos are uploaded to subscribed channels, but you don't receive notifications
+
+**Possible Causes and Solutions:**
+
+1. **Subscription expired or not verified**
+   - Check the subscription status using the [Subscription Status endpoint](/api-reference/endpoint/subscription-status)
+   - Renew the subscription if it has expired
+
+2. **Webhook URL changed**
+   - If your webhook URL has changed, you need to create a new subscription with the new URL
+
+3. **Webhook server issues**
+   - Ensure your webhook server is running and accessible
+   - Check server logs for any errors when processing notifications
+
+4. **YouTube API issues**
+   - Rarely, YouTube's PubSubHubbub hub may experience issues
+   - Check if other subscriptions are working correctly
+
+### Duplicate Notifications
+
+**Symptoms:**
+- You receive multiple notifications for the same video
+
+**Solutions:**
+- Implement deduplication logic in your webhook handler
+- Use the video ID as a unique identifier to detect duplicates
+- Store processed video IDs and check against them before processing new notifications
+
+## N8N Integration Issues
+
+### N8N Webhook Not Working
+
+**Symptoms:**
+- Subscriptions with N8N webhook URLs fail to verify
+- You don't receive notifications in your N8N workflow
+
+**Solutions:**
+1. **Ensure N8N is running**
+   - Make sure your N8N instance is running and accessible
+   - If using the desktop app, keep it open
+
+2. **Check webhook configuration**
+   - Verify that the webhook node is configured correctly
+   - Ensure the webhook is activated (has a green dot)
+
+3. **Check N8N URL format**
+   - Make sure you're using the correct webhook URL format from N8N
+   - The URL should look like `https://your-n8n-instance.com/webhook/youtube-notifications`
+
+4. **Check execution logs**
+   - In N8N, go to "Executions" to see if there are any errors
+   - Look for failed executions and check the error messages
+
+### N8N Workflow Not Processing Notifications
+
+**Symptoms:**
+- Notifications are being received by N8N, but the workflow isn't processing them correctly
+
+**Solutions:**
+1. **Check node configurations**
+   - Verify that all nodes in your workflow are configured correctly
+   - Test each node individually to identify the issue
+
+2. **Check data mapping**
+   - Ensure you're accessing the notification data correctly in your nodes
+   - Use the "Debug" node to see the data structure at different points in the workflow
+
+3. **Update N8N**
+   - Make sure you're using the latest version of N8N
+   - Update any nodes that might be outdated
+
+## API Rate Limits
+
+### Rate Limit Exceeded
+
+**Symptoms:**
+- You receive a 429 Too Many Requests error
+- The error message indicates that you've exceeded the rate limit
+
+**Solutions:**
+1. **Reduce API request frequency**
+   - Implement exponential backoff for retries
+   - Cache responses when appropriate
+
+2. **Optimize API usage**
+   - Batch operations when possible
+   - Only request the data you need
+
+## Contact Support
+
+If you've tried the solutions above and are still experiencing issues, please contact our support team:
+
+- Email: support@youtube-notifier.com
+- Include detailed information about the issue, including error messages and steps to reproduce
+- Provide your webhook URL and any relevant subscription IDs
+
+Our team will get back to you as soon as possible to help resolve your issue.
+
+<Note>
+  Before contacting support, please check this troubleshooting guide and the API documentation to see if your issue is already addressed.
+</Note> 

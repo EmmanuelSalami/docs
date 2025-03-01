@@ -1,0 +1,203 @@
+---
+title: 'Unsubscribe'
+description: 'Unsubscribe from YouTube channel notifications'
+---
+
+# Unsubscribe
+
+The Unsubscribe endpoint allows you to stop receiving notifications for specific YouTube channels or all channels associated with a webhook URL.
+
+## Unsubscribe from Specific Channels
+
+<ParamField body="webhookUrl" type="string" required>
+  The webhook URL you used when subscribing to channels.
+</ParamField>
+
+<ParamField body="channelIds" type="array" required>
+  An array of YouTube channel IDs to unsubscribe from.
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/unsubscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "webhookUrl": "https://your-webhook-url.com/endpoint",
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "success": true,
+  "message": "Unsubscribed successfully",
+  "webhookUrl": "https://your-webhook-url.com/endpoint",
+  "unsubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+  "remainingChannels": ["UCsvqVGtbbyHaMoevxPAq9Fg"]
+}
+```
+</ResponseExample>
+
+## Unsubscribe from All Channels
+
+<ParamField body="webhookUrl" type="string" required>
+  The webhook URL you used when subscribing to channels.
+</ParamField>
+
+<ParamField body="allChannels" type="boolean" required>
+  Set to `true` to unsubscribe from all channels associated with the webhook URL.
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/unsubscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "webhookUrl": "https://your-webhook-url.com/endpoint",
+    "allChannels": true
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "success": true,
+  "message": "Unsubscribed from all channels successfully",
+  "webhookUrl": "https://your-webhook-url.com/endpoint",
+  "unsubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw", "UCsvqVGtbbyHaMoevxPAq9Fg"],
+  "subscriptionRemoved": true
+}
+```
+</ResponseExample>
+
+## N8N Dual Webhook Unsubscribe
+
+If you're using N8N, the system automatically detects N8N webhook URLs and provides dual webhook support for unsubscribing. When you unsubscribe using an N8N test webhook URL, the system will also unsubscribe from the corresponding production webhook URL.
+
+<RequestExample>
+```bash cURL
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/unsubscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "webhookUrl": "https://your-n8n-instance.com/webhook-test/youtube",
+    "allChannels": true
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "success": true,
+  "message": "Unsubscribed from all channels successfully",
+  "webhookUrl": "https://your-n8n-instance.com/webhook-test/youtube",
+  "unsubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+  "subscriptionRemoved": true,
+  "dualUnsubscription": {
+    "productionWebhookUrl": "https://your-n8n-instance.com/webhook/youtube",
+    "success": true,
+    "message": "Unsubscribed from all channels successfully",
+    "unsubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+    "subscriptionRemoved": true
+  }
+}
+```
+</ResponseExample>
+
+## Error Responses
+
+### Webhook URL Not Found (404)
+
+<ResponseExample>
+```json Response (404 Not Found)
+{
+  "success": false,
+  "error": "No subscription found for the provided webhook URL",
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
+</ResponseExample>
+
+### Invalid Channel IDs (400)
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "error": "One or more channel IDs are not in the correct YouTube format",
+  "invalidChannelIds": ["invalid-channel-id"],
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
+</ResponseExample>
+
+### No Channels Specified (400)
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "error": "You must specify either channelIds (array) or allChannels (true) to unsubscribe",
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
+</ResponseExample>
+
+### Channels Not in Subscription (400)
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "error": "None of the provided channel IDs are in the subscription",
+  "webhookUrl": "https://your-webhook-url.com/endpoint",
+  "providedChannelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+  "subscribedChannelIds": ["UCsvqVGtbbyHaMoevxPAq9Fg"]
+}
+```
+</ResponseExample>
+
+### Invalid Webhook URL Format (400)
+
+<ResponseExample>
+```json Response (400 Bad Request)
+{
+  "success": false,
+  "error": "Invalid webhook URL format",
+  "webhookUrl": "not-a-valid-url"
+}
+```
+</ResponseExample>
+
+### Method Not Allowed (405)
+
+<ResponseExample>
+```json Response (405 Method Not Allowed)
+{
+  "success": false,
+  "error": "Method not allowed. Please use POST."
+}
+```
+</ResponseExample>
+
+### Server Error (500)
+
+<ResponseExample>
+```json Response (500 Internal Server Error)
+{
+  "success": false,
+  "error": "An error occurred while processing your unsubscribe request",
+  "details": "Error communicating with YouTube's PubSubHubbub hub"
+}
+```
+</ResponseExample>
+
+<Note>
+  When you unsubscribe from all channels, the subscription is completely removed from the system. If you want to subscribe again, you'll need to create a new subscription.
+</Note> 

@@ -1,33 +1,118 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Reference'
+description: 'Complete reference for the YouTube Notification System API'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+# API Reference
 
-## Welcome
+The YouTube Notification System provides a RESTful API that allows you to programmatically manage subscriptions to YouTube channels and receive notifications when new videos are uploaded.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Base URL
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+All API endpoints are relative to the base URL:
+
+```
+https://youtube-notifier.vercel.app/api
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+The API currently does not require authentication. All endpoints are publicly accessible.
+
+<Note>
+  While authentication is not required, you should keep your `userKey` (returned when subscribing) private as it can be used to manage your subscriptions.
+</Note>
+
+## Rate Limiting
+
+The API currently does not implement rate limiting. However, as a best practice, you should limit your requests to avoid potential service disruptions.
+
+## Endpoints
+
+The API provides the following endpoints:
+
+<CardGroup cols={2}>
+  <Card
+    title="Subscribe"
+    icon="bell-plus"
+    href="/api-reference/endpoint/subscribe"
+  >
+    Subscribe to YouTube channel notifications
+  </Card>
+  <Card
+    title="Subscription Status"
+    icon="bell"
+    href="/api-reference/endpoint/subscription-status"
+  >
+    Check the status of your subscriptions
+  </Card>
+  <Card
+    title="Unsubscribe"
+    icon="user-minus"
+    href="/api-reference/endpoint/unsubscribe"
+  >
+    Unsubscribe from YouTube channels
+  </Card>
+  <Card
+    title="Notification Format"
+    icon="gear"
+    href="/api-reference/endpoint/notification-format"
+  >
+    Learn about the notification format sent to your webhook
+  </Card>
+</CardGroup>
+
+## Error Handling
+
+The API uses conventional HTTP response codes to indicate the success or failure of an API request:
+
+- `2xx` range indicates success
+- `4xx` range indicates an error that failed given the information provided (e.g., a required parameter was omitted)
+- `5xx` range indicates an error with our servers
+
+All error responses include a JSON object with the following properties:
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+{
+  "success": false,
+  "message": "A human-readable message providing more details about the error."
+}
 ```
+
+## Webhooks
+
+When a new video is uploaded to a subscribed YouTube channel, the system will send a POST request to your webhook URL with the notification data.
+
+The webhook payload will include the following properties:
+
+```json
+{
+  "event": "youtube.video.published",
+  "video": {
+    "id": "dQw4w9WgXcQ",
+    "title": "Video Title",
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "published_at": "2023-01-01T12:00:00Z",
+    "updated_at": "2023-01-01T12:00:00Z"
+  },
+  "channel": {
+    "id": "UC1234567890",
+    "name": "Channel Name"
+  },
+  "timestamp": "2023-01-01T12:05:00Z"
+}
+```
+
+## N8N Integration
+
+This API is designed to work seamlessly with N8N workflows. It includes special features for N8N users, such as:
+
+- Automatic detection of N8N webhook URLs
+- Dual webhook support (test and production)
+- Consistent JSON formatting for webhook payloads
+
+See the [N8N Integration](/n8n-integration/getting-started) section for more details.
+
+## Need Help?
+
+If you have any questions or need help with the YouTube Notification System, join our [skool community](https://www.skool.com/ai-automation-blueprint/about) for full support.

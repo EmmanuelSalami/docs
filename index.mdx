@@ -1,0 +1,74 @@
+---
+title: 'YouTube Notification System'
+description: 'Get real-time notifications for new YouTube videos from your favorite channels'
+---
+
+<img className="block dark:hidden" src="/logo/light.png" alt="YouTube Notification System Logo" />
+<img className="hidden dark:block" src="/logo/dark.png" alt="YouTube Notification System Logo" />
+
+# YouTube Notification System
+
+Welcome to the YouTube Notification System documentation. This system allows you to receive real-time notifications when new videos are uploaded to your favorite YouTube channels.
+
+## Features
+
+- **Real-time Notifications**: Get notified immediately when new videos are uploaded
+- **Customizable Formats**: Choose how your notifications look
+- **Webhook Integration**: Send notifications to any system that accepts webhooks
+- **N8N Integration**: Easily create automation workflows with N8N
+
+## Getting Started
+
+<CardGroup cols={2}>
+  <Card
+    title="Introduction"
+    icon="book"
+    href="/introduction"
+  >
+    Learn about the YouTube Notification System and how it works
+  </Card>
+  <Card
+    title="Quickstart"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get up and running in minutes with our quickstart guide
+  </Card>
+  <Card
+    title="API Reference"
+    icon="rectangle-terminal"
+    href="/api-reference/introduction"
+  >
+    Explore the API endpoints and how to use them
+  </Card>
+  <Card
+    title="N8N Integration"
+    icon="plug"
+    href="/n8n-integration/getting-started"
+  >
+    Learn how to integrate with N8N for powerful automations
+  </Card>
+</CardGroup>
+
+## How It Works
+
+The YouTube Notification System uses YouTube's PubSubHubbub protocol to subscribe to channel updates. When a new video is uploaded, YouTube sends a notification to our system, which then forwards it to your specified webhook URL.
+
+<Steps>
+  <Step title="Subscribe to Channels">
+    Use the API to subscribe to your favorite YouTube channels
+  </Step>
+  <Step title="Configure Webhook">
+    Specify where you want to receive notifications
+  </Step>
+  <Step title="Receive Notifications">
+    Get notified when new videos are uploaded
+  </Step>
+  <Step title="Process Notifications">
+    Use the notification data to trigger actions in your system
+  </Step>
+</Steps>
+
+## Need Help?
+
+If you have any questions or need help with the YouTube Notification System, join our [skool community](https://www.skool.com/ai-automation-blueprint/about) for full support.

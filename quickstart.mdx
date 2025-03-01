@@ -1,97 +1,187 @@
 ---
 title: 'Quickstart'
-description: 'Start building awesome documentation in under 5 minutes'
+description: 'Get started with the YouTube Notification System in minutes'
 ---
 
-## Setup your development
+# Quickstart Guide
 
-Learn how to update your docs locally and deploy them to the public.
+This guide will help you quickly set up and start using the YouTube Notification System to receive real-time notifications when new videos are uploaded to your favorite YouTube channels.
 
-### Edit and preview
+## Using the API
 
-<AccordionGroup>
-  <Accordion icon="github" title="Clone your docs locally">
-    During the onboarding process, we created a repository on your Github with
-    your docs content. You can find this repository on our
-    [dashboard](https://dashboard.mintlify.com). To clone the repository
-    locally, follow these
-    [instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-    in your terminal.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Preview changes">
-    Previewing helps you make sure your changes look as intended. We built a
-    command line interface to render these changes locally. 
-    1. Install the
-    [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the
-    documentation changes locally with this command: ``` npm i -g mintlify ```
-    2. Run the following command at the root of your documentation (where
-    `docs.json` is): ``` mintlify dev ```
-    <Note>
-      If you’re currently using the legacy ```mint.json``` configuration file, please update the Mintlify CLI:
+The YouTube Notification System is a REST API that you can use directly without any installation. You'll interact with the API endpoints using HTTP requests.
+
+### Base URL
+
+All API endpoints are relative to the base URL:
+
+```
+https://youtube-notifier.vercel.app/api
+```
+
+## Step 1: Subscribe to YouTube Channels
+
+To start receiving notifications, you need to subscribe to one or more YouTube channels using the Subscribe endpoint.
+
+```bash
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+    "webhookUrl": "https://your-webhook-url.com/endpoint"
+  }'
+```
+
+Replace `UC_x5XG1OV2P6uZZ5FSM9Ttw` with the YouTube channel ID you want to subscribe to, and `https://your-webhook-url.com/endpoint` with your actual webhook URL that will receive the notifications.
+
+### Finding a YouTube Channel ID
+
+To find a YouTube channel ID:
+
+1. Go to the YouTube channel page
+2. View the page source (right-click and select "View Page Source")
+3. Search for "channelId"
+4. The channel ID starts with "UC" followed by 22 characters
 
 
-      ```npm i -g mintlify@latest```
-      And run the new upgrade command in your docs repository:
+Alternatively, you can use a [web tool](https://commentpicker.com/youtube-channel-id.php) to find the YouTube channel ID.
 
-      ```mintlify upgrade```
-      You should now be using the new ```docs.json``` configuration file. Feel free to delete the ```mint.json``` file from your repository.
-    </Note>
-  </Accordion>
-</AccordionGroup>
+### Response
 
-### Deploy your changes
+If successful, you'll receive a response like this:
 
-<AccordionGroup>
+```json
+{
+  "success": true,
+  "userKey": "abc123def456ghij",
+  "message": "Subscribed successfully",
+  "newlySubscribedChannels": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+  "webhookUrl": "https://your-webhook-url.com/endpoint"
+}
+```
 
-<Accordion icon="message-bot" title="Install our Github app">
-  Our Github app automatically deploys your changes to your docs site, so you
-  don't need to manage deployments yourself. You can find the link to install on
-  your [dashboard](https://dashboard.mintlify.com). Once the bot has been
-  successfully installed, there should be a check mark next to the commit hash
-  of the repo.
-</Accordion>
-<Accordion icon="rocket" title="Push your changes">
-  [Commit and push your changes to
-  Git](https://docs.github.com/en/get-started/using-git/pushing-commits-to-a-remote-repository#about-git-push)
-  for your changes to update in your docs site. If you push and don't see that
-  the Github app successfully deployed your changes, you can also manually
-  update your docs through our [dashboard](https://dashboard.mintlify.com).
-</Accordion>
+Save the `userKey` as it can be useful for managing your subscription later.
 
-</AccordionGroup>
+## Step 2: Set Up Your Webhook Endpoint
 
-## Update your docs
+Your webhook endpoint needs to be able to receive POST requests with JSON data. The YouTube Notification System handles all the verification with YouTube's PubSubHubbub hub automatically, so you don't need to implement any special verification logic on your end.
 
-Add content directly in your files with MDX syntax and React components. You can use any of our components, or even build your own.
+<Note>
+  The system automatically handles all webhook verification with YouTube. You don't need to implement any verification logic yourself.
+</Note>
+
+## Step 3: Check Subscription Status
+
+After subscribing, you can check the status of your subscriptions using the Subscription Status endpoint:
+
+```bash
+curl --request GET \
+  --url 'https://youtube-notifier.vercel.app/api/subscription-status?webhookUrl=https://your-webhook-url.com/endpoint'
+```
+
+This will return information about your subscriptions, including whether they've been verified by YouTube and when they expire.
+
+## Step 4: Receive Notifications
+
+Once your subscription is verified, you'll start receiving notifications at your webhook URL whenever a new video is uploaded to the subscribed channels.
+
+Notifications are sent as JSON payloads in POST requests:
+
+```json
+{
+  "event": "youtube.video.published",
+  "video": {
+    "id": "dQw4w9WgXcQ",
+    "title": "Video Title",
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "published_at": "2023-05-05T10:30:00Z",
+    "updated_at": "2023-05-05T10:30:00Z"
+  },
+  "channel": {
+    "id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "name": "Channel Name"
+  },
+  "timestamp": "2023-05-05T10:35:00Z"
+}
+```
+
+## Step 5: Renew Subscriptions
+
+YouTube PubSubHubbub subscriptions expire after approximately 10 days. To ensure you continue receiving notifications, you should renew your subscriptions before they expire.
+
+To renew, simply use the same Subscribe endpoint with the same parameters:
+
+```bash
+curl --request POST \
+  --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+    "webhookUrl": "https://your-webhook-url.com/endpoint"
+  }'
+```
+
+## Using N8N for Automation
+
+If you want to automate your workflows, you can use N8N with the YouTube Notification System.
+
+<Steps>
+  <Step title="Create an N8N Webhook">
+    1. In N8N, create a new workflow
+    2. Add a Webhook node as the trigger
+    3. Configure it to receive POST requests
+    4. Copy the webhook URL provided by N8N
+  </Step>
+  
+  <Step title="Subscribe using the N8N webhook URL">
+    Use the Subscribe endpoint with your N8N webhook URL:
+    
+    ```bash
+    curl --request POST \
+      --url 'https://youtube-notifier.vercel.app/api/subscribe' \
+      --header 'Content-Type: application/json' \
+      --data '{
+        "channelIds": ["UC_x5XG1OV2P6uZZ5FSM9Ttw"],
+        "webhookUrl": "https://your-n8n-instance.com/webhook/youtube"
+      }'
+    ```
+  </Step>
+  
+  <Step title="Build your workflow">
+    Add nodes to your N8N workflow to process the notifications and perform actions like:
+    - Sending messages to Discord, Slack, or other platforms
+    - Saving video information to a database
+    - Triggering other workflows or services
+  </Step>
+  
+  <Step title="Set up automatic renewal">
+    Create a scheduled trigger in N8N to call the Subscribe endpoint every 9 days to renew your subscriptions before they expire.
+  </Step>
+</Steps>
+
+## Next Steps
+
+Now that you've set up the YouTube Notification System, you can:
 
 <CardGroup>
+  <Card title="Manage Subscriptions" icon="user-plus" href="/api-reference/endpoint/subscribe">
+    Learn how to add more channels or unsubscribe from channels.
+  </Card>
 
-<Card title="Add Content With MDX" icon="file" href="/essentials/markdown">
-  Add content to your docs with MDX syntax.
-</Card>
+  <Card title="Check Subscription Status" icon="bell" href="/api-reference/endpoint/subscription-status">
+    Learn how to check the status of your subscriptions.
+  </Card>
 
-<Card
-  title="Add Code Blocks"
-  icon="square-code"
-  href="/essentials/code"
->
-  Add code directly to your docs with syntax highlighting.
-</Card>
+  <Card title="Integrate with N8N" icon="plug" href="/n8n-integration/getting-started">
+    Learn more about using N8N with the YouTube Notification System.
+  </Card>
 
-<Card
-  title="Add Images"
-  icon="image"
-  href="/essentials/images"
->
-  Add images to your docs to make them more engaging.
-</Card>
-
-<Card
-  title="Add Custom Components"
-  icon="puzzle-piece"
-  href="/essentials/reusable-snippets"
->
-  Add templates to your docs to make them more reusable.
-</Card>
-
+  <Card title="Troubleshooting" icon="wrench" href="/troubleshooting">
+    Find solutions to common issues.
+  </Card>
 </CardGroup>
+
+<Note>
+  Remember to renew your subscriptions regularly, as YouTube's PubSubHubbub hub automatically expires subscriptions after approximately 10 days.
+</Note>
