@@ -1,0 +1,52 @@
+# YouTube Notification System Documentation
+
+## Project Overview
+
+The YouTube Notification System is a serverless API built with Next.js for subscribing to YouTube channel updates and integrating with N8N for automation. It allows you to receive real-time notifications when new videos are published on channels you've subscribed to.
+
+## Key Features
+
+- **Multi-Channel Subscriptions**: Subscribe to multiple YouTube channels with a single API call
+- **Real-Time Notifications**: Receive notifications as soon as new videos are published
+- **N8N Integration**: Forward notifications to N8N webhooks for automation
+- **Subscription Status**: Check the status of your subscriptions at any time
+- **Auto-Renewal**: Automatically renew subscriptions before they expire
+
+## System Architecture
+
+The system consists of the following components:
+
+1. **Subscribe API**: Registers your webhook URL and the channel IDs you want to subscribe to with YouTube's PubSubHubbub hub
+2. **YouTube Notification System**: YouTube sends notifications to our system when new videos are published
+3. **Webhook Receiver**: Our system receives the notifications and processes them
+4. **Notification Forwarding**: The notifications are forwarded to your webhook URL
+5. **N8N Workflows**: Your N8N instance receives the notifications and triggers automation workflows
+
+## Getting Started
+
+To get started with the YouTube Notification System, follow these steps:
+
+1. **Create an N8N Webhook**: Set up a webhook in N8N to receive notifications
+2. **Subscribe to Channels**: Use the Subscribe API to register your webhook URL and the channel IDs you want to subscribe to
+3. **Build Automation Workflows**: Create workflows in N8N to process the notifications
+4. **Set Up Auto-Renewal**: Set up a workflow to automatically renew subscriptions before they expire
+
+## Quick Start
+
+To subscribe to YouTube channels, use the Subscribe API:
+
+```bash
+curl -X POST https://your-api-url.com/api/subscribe \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channelIds": ["UCxxx", "UCyyy"],
+    "webhookUrl": "https://your-webhook-url.com"
+  }'
+```
+
+## API Reference
+
+- [Subscribe API](/docs/api-reference/subscribe) - Subscribe to YouTube channels
+- [Subscription Status API](/docs/api-reference/subscription-status) - Check the status of your subscriptions
+- [Unsubscribe API](/docs/api-reference/unsubscribe) - Unsubscribe from YouTube channels
+- [Notification Format](/docs/api-reference/notification-format) - Format of the notifications sent to your webhook 

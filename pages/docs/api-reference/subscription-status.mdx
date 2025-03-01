@@ -1,0 +1,125 @@
+# Subscription Status API
+
+The Subscription Status API allows you to check the status of your YouTube channel subscriptions, including which channels you're subscribed to and when the subscriptions will expire.
+
+## Use Cases
+
+- Check if your subscriptions are active
+- Verify which channels you're subscribed to
+- Determine when your subscriptions will expire
+- Plan for subscription renewal
+
+## How It Works
+
+1. You send a GET request to the Subscription Status API endpoint with your user key
+2. The API checks your subscription status in the database
+3. The API returns information about your subscriptions, including:
+   - List of subscribed channels
+   - Expiration date
+   - Days until expiration
+   - Webhook URL configured for notifications
+
+## Request
+
+### Endpoint
+
+```
+GET /api/subscription-status
+```
+
+### Query Parameters
+
+| Parameter | Type   | Required | Description                                                |
+|-----------|--------|----------|------------------------------------------------------------|
+| userKey   | string | Yes      | The unique key provided when you first subscribed          |
+
+### Example Request
+
+```bash
+curl -X GET "https://your-api-url.com/api/subscription-status?userKey=abc123def456"
+```
+
+## Response
+
+### Success Response (200 OK)
+
+```json
+{
+  "success": true,
+  "subscriptionStatus": {
+    "active": true,
+    "subscribedChannels": [
+      {
+        "channelId": "UCxxx",
+        "channelTitle": "Channel Name 1"
+      },
+      {
+        "channelId": "UCyyy",
+        "channelTitle": "Channel Name 2"
+      }
+    ],
+    "expirationDate": "2023-12-31T23:59:59Z",
+    "daysUntilExpiration": 5,
+    "webhookUrl": "https://your-webhook-url.com/path"
+  }
+}
+```
+
+### Response Fields
+
+| Field                                | Type    | Description                                                |
+|--------------------------------------|---------|-----------------------------------------------------------|
+| success                              | boolean | Indicates if the request was successful                    |
+| subscriptionStatus                   | object  | Contains information about the subscription status         |
+| subscriptionStatus.active            | boolean | Indicates if the subscription is currently active          |
+| subscriptionStatus.subscribedChannels| array   | List of channels you're subscribed to                      |
+| subscriptionStatus.expirationDate    | string  | ISO 8601 date when the subscription will expire            |
+| subscriptionStatus.daysUntilExpiration| number | Number of days until the subscription expires              |
+| subscriptionStatus.webhookUrl        | string  | The webhook URL where notifications are being sent         |
+
+### Error Response (400 Bad Request)
+
+```json
+{
+  "success": false,
+  "error": "Missing required parameter: userKey"
+}
+```
+
+### Error Response (404 Not Found)
+
+```json
+{
+  "success": false,
+  "error": "No subscription found for the provided userKey"
+}
+```
+
+## Error Codes
+
+| Status Code | Description                                                |
+|-------------|------------------------------------------------------------|
+| 400         | Bad Request - Missing required parameters                  |
+| 404         | Not Found - No subscription found for the provided userKey |
+| 500         | Internal Server Error - Something went wrong on the server |
+
+## Best Practices
+
+1. **Regular Status Checks**: Check your subscription status regularly to ensure your subscriptions are active.
+2. **Automated Renewal**: Set up automated renewal when your subscriptions are about to expire (typically when `daysUntilExpiration` is less than 2).
+3. **Error Handling**: Implement proper error handling in your application to handle cases where the subscription might not be found or has expired.
+
+## Integration with N8N
+
+You can use the Subscription Status API with N8N to automate subscription management:
+
+1. Create a workflow that periodically checks the subscription status
+2. If `daysUntilExpiration` is below a threshold (e.g., 2 days), trigger a renewal
+3. Send notifications if subscriptions are about to expire
+
+For more details, see the [N8N Integration](/docs/n8n-integration/getting-started) documentation.
+
+## Related APIs
+
+- [Subscribe API](/docs/api-reference/subscribe) - Subscribe to YouTube channels
+- [Unsubscribe API](/docs/api-reference/unsubscribe) - Unsubscribe from YouTube channels

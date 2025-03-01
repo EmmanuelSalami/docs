@@ -1,0 +1,161 @@
+# Notification Format
+
+This document describes the format of notifications sent to your webhook URL when a new video is published on a subscribed YouTube channel.
+
+## Overview
+
+When a new video is published on a YouTube channel you've subscribed to, the YouTube Notification System will send a POST request to your webhook URL with information about the video. This allows you to process the notification and take appropriate actions, such as sending alerts, updating a database, or triggering other workflows.
+
+## Notification Structure
+
+Notifications are sent as JSON objects in the body of a POST request to your webhook URL.
+
+### Example Notification
+
+```json
+{
+  "videoId": "dQw4w9WgXcQ",
+  "title": "Rick Astley - Never Gonna Give You Up (Official Music Video)",
+  "channelId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+  "channelTitle": "Rick Astley",
+  "publishedAt": "2009-10-25T06:57:33Z",
+  "description": "The official music video for "Never Gonna Give You Up" by Rick Astley...",
+  "thumbnails": {
+    "default": {
+      "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg",
+      "width": 120,
+      "height": 90
+    },
+    "medium": {
+      "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+      "width": 320,
+      "height": 180
+    },
+    "high": {
+      "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      "width": 480,
+      "height": 360
+    }
+  },
+  "tags": ["Rick Astley", "Never Gonna Give You Up", "Official", "Music Video"],
+  "categoryId": "10",
+  "liveBroadcastContent": "none",
+  "defaultLanguage": "en",
+  "defaultAudioLanguage": "en",
+  "notificationTimestamp": "2023-12-01T12:34:56Z",
+  "userKey": "abc123def456"
+}
+```
+
+### Notification Fields
+
+| Field                 | Type   | Description                                                |
+|-----------------------|--------|------------------------------------------------------------|
+| videoId               | string | The YouTube video ID                                       |
+| title                 | string | The title of the video                                     |
+| channelId             | string | The ID of the YouTube channel                              |
+| channelTitle          | string | The title of the YouTube channel                           |
+| publishedAt           | string | ISO 8601 date when the video was published                 |
+| description           | string | The description of the video                               |
+| thumbnails            | object | Object containing thumbnail images in different sizes      |
+| thumbnails.default    | object | Small thumbnail (120x90)                                   |
+| thumbnails.medium     | object | Medium thumbnail (320x180)                                 |
+| thumbnails.high       | object | High-quality thumbnail (480x360)                           |
+| tags                  | array  | Array of tags associated with the video                    |
+| categoryId            | string | The category ID of the video                               |
+| liveBroadcastContent  | string | Indicates if the video is a live broadcast                 |
+| defaultLanguage       | string | The default language of the video                          |
+| defaultAudioLanguage  | string | The default audio language of the video                    |
+| notificationTimestamp | string | ISO 8601 date when the notification was sent               |
+| userKey               | string | Your user key for verification                             |
+
+## Handling Notifications
+
+When your webhook receives a notification, you should:
+
+1. Verify the `userKey` to ensure the notification is legitimate
+2. Process the video information as needed
+3. Return a 200 OK response to acknowledge receipt of the notification
+
+### Example Webhook Handler (Node.js)
+
+```javascript
+// Example webhook handler using Express
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/webhook', (req, res) => {
+  const notification = req.body;
+  
+  // Verify the userKey
+  if (notification.userKey !== 'YOUR_USER_KEY') {
+    return res.status(403).send('Invalid user key');
+  }
+  
+  // Process the notification
+  console.log(`New video from ${notification.channelTitle}: ${notification.title}`);
+  console.log(`Watch at: https://www.youtube.com/watch?v=${notification.videoId}`);
+  
+  // Store in database, send alerts, etc.
+  // ...
+  
+  // Acknowledge receipt
+  res.status(200).send('Notification received');
+});
+
+app.listen(3000, () => {
+  console.log('Webhook server listening on port 3000');
+});
+```
+
+## Best Practices
+
+1. **Verify the User Key**: Always verify the `userKey` in the notification to ensure it's coming from your subscription.
+2. **Process Quickly**: Your webhook should process notifications quickly and return a 200 OK response as soon as possible.
+3. **Handle Duplicates**: Occasionally, you might receive duplicate notifications for the same video. Implement deduplication logic to handle this.
+4. **Error Handling**: Implement robust error handling in your webhook to prevent crashes.
+5. **Logging**: Log all received notifications for debugging and auditing purposes.
+6. **Asynchronous Processing**: For time-consuming tasks, acknowledge the notification immediately and process it asynchronously.
+
+## Testing Notifications
+
+You can test your webhook's ability to handle notifications by sending a test notification:
+
+```bash
+curl -X POST https://your-webhook-url.com/path \
+  -H "Content-Type: application/json" \
+  -d '{
+    "videoId": "dQw4w9WgXcQ",
+    "title": "Test Video",
+    "channelId": "UCxxx",
+    "channelTitle": "Test Channel",
+    "publishedAt": "2023-12-01T12:34:56Z",
+    "description": "This is a test notification",
+    "thumbnails": {
+      "default": {
+        "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg",
+        "width": 120,
+        "height": 90
+      }
+    },
+    "notificationTimestamp": "2023-12-01T12:34:56Z",
+    "userKey": "YOUR_USER_KEY"
+  }'
+```
+
+## Integration with N8N
+
+N8N provides an easy way to handle these notifications. When setting up your N8N workflow:
+
+1. Use a Webhook node to receive the notification
+2. Access video information using expressions like `{{$json.title}}`, `{{$json.videoId}}`, etc.
+3. Use this information to trigger actions in other nodes
+
+For more details, see the [N8N Integration](/docs/n8n-integration/getting-started) documentation.
+
+## Related APIs
+
+- [Subscribe API](/docs/api-reference/subscribe) - Subscribe to YouTube channels
+- [Subscription Status API](/docs/api-reference/subscription-status) - Check the status of your subscriptions
+- [Unsubscribe API](/docs/api-reference/unsubscribe) - Unsubscribe from YouTube channels 

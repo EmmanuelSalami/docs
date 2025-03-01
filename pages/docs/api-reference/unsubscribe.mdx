@@ -1,0 +1,161 @@
+# Unsubscribe API
+
+The Unsubscribe API allows you to stop receiving notifications for specific YouTube channels or to completely remove your subscription from the system.
+
+## Use Cases
+
+- Remove specific channels from your subscription list
+- Completely unsubscribe from all channels
+- Clean up unused subscriptions
+- Update your subscription preferences
+
+## How It Works
+
+1. You send a POST request to the Unsubscribe API endpoint with your user key and the channels you want to unsubscribe from
+2. The API removes the specified channels from your subscription list
+3. If no channels are specified, all subscriptions are removed
+4. The API returns a confirmation of the unsubscribe action
+
+## Request
+
+### Endpoint
+
+```
+POST /api/unsubscribe
+```
+
+### Request Body
+
+| Parameter  | Type     | Required | Description                                                |
+|------------|----------|----------|------------------------------------------------------------|
+| userKey    | string   | Yes      | The unique key provided when you first subscribed          |
+| channelIds | string[] | No       | Array of YouTube channel IDs to unsubscribe from. If not provided, all subscriptions will be removed |
+
+### Example Request (Unsubscribe from specific channels)
+
+```bash
+curl -X POST https://your-api-url.com/api/unsubscribe \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userKey": "abc123def456",
+    "channelIds": ["UCxxx", "UCyyy"]
+  }'
+```
+
+### Example Request (Unsubscribe from all channels)
+
+```bash
+curl -X POST https://your-api-url.com/api/unsubscribe \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userKey": "abc123def456"
+  }'
+```
+
+## Response
+
+### Success Response (200 OK) - Specific Channels
+
+```json
+{
+  "success": true,
+  "message": "Successfully unsubscribed from specified channels",
+  "unsubscribedChannels": [
+    {
+      "channelId": "UCxxx",
+      "channelTitle": "Channel Name 1"
+    },
+    {
+      "channelId": "UCyyy",
+      "channelTitle": "Channel Name 2"
+    }
+  ],
+  "remainingSubscribedChannels": [
+    {
+      "channelId": "UCzzz",
+      "channelTitle": "Channel Name 3"
+    }
+  ]
+}
+```
+
+### Success Response (200 OK) - All Channels
+
+```json
+{
+  "success": true,
+  "message": "Successfully unsubscribed from all channels",
+  "unsubscribedChannels": [
+    {
+      "channelId": "UCxxx",
+      "channelTitle": "Channel Name 1"
+    },
+    {
+      "channelId": "UCyyy",
+      "channelTitle": "Channel Name 2"
+    },
+    {
+      "channelId": "UCzzz",
+      "channelTitle": "Channel Name 3"
+    }
+  ],
+  "remainingSubscribedChannels": []
+}
+```
+
+### Response Fields
+
+| Field                      | Type    | Description                                                |
+|----------------------------|---------|-----------------------------------------------------------|
+| success                    | boolean | Indicates if the request was successful                    |
+| message                    | string  | A message describing the result of the operation           |
+| unsubscribedChannels       | array   | List of channels you've unsubscribed from                  |
+| remainingSubscribedChannels| array   | List of channels you're still subscribed to                |
+
+### Error Response (400 Bad Request)
+
+```json
+{
+  "success": false,
+  "error": "Missing required parameter: userKey"
+}
+```
+
+### Error Response (404 Not Found)
+
+```json
+{
+  "success": false,
+  "error": "No subscription found for the provided userKey"
+}
+```
+
+## Error Codes
+
+| Status Code | Description                                                |
+|-------------|------------------------------------------------------------|
+| 400         | Bad Request - Missing required parameters                  |
+| 404         | Not Found - No subscription found for the provided userKey |
+| 500         | Internal Server Error - Something went wrong on the server |
+
+## Best Practices
+
+1. **Selective Unsubscribing**: When possible, unsubscribe only from specific channels rather than removing all subscriptions.
+2. **Verification**: After unsubscribing, verify the remaining subscribed channels to ensure the correct channels were removed.
+3. **User Confirmation**: In your application, always ask for user confirmation before unsubscribing, especially when removing all subscriptions.
+4. **Logging**: Keep logs of unsubscribe actions for troubleshooting and auditing purposes.
+
+## Integration with N8N
+
+You can use the Unsubscribe API with N8N to automate subscription management:
+
+1. Create a workflow that triggers unsubscribe actions based on certain conditions
+2. Use the HTTP Request node to call the Unsubscribe API
+3. Process the response to confirm the unsubscribe action was successful
+
+For more details, see the [N8N Integration](/docs/n8n-integration/getting-started) documentation.
+
+## Related APIs
+
+- [Subscribe API](/docs/api-reference/subscribe) - Subscribe to YouTube channels
+- [Subscription Status API](/docs/api-reference/subscription-status) - Check the status of your subscriptions 

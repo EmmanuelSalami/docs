@@ -1,0 +1,189 @@
+# N8N Workflow Examples
+
+This page provides examples of N8N workflows that you can create with the YouTube Notification System. These examples demonstrate how to automate various tasks when new videos are published on subscribed YouTube channels.
+
+## Basic Notification Workflow
+
+This simple workflow sends a notification to a Slack channel whenever a new video is published.
+
+### Workflow Steps:
+
+1. **Webhook Node**: Receives notifications from the YouTube Notification System
+2. **Slack Node**: Sends a message to a Slack channel
+
+### Configuration:
+
+#### Webhook Node
+- Configure as described in the [Getting Started](/docs/n8n-integration/getting-started) guide
+
+#### Slack Node
+- **Authentication**: Connect to your Slack account
+- **Channel**: Select the channel to post to
+- **Text**: Use an expression like:
+  ```
+  New video from {{$json.channelTitle}}: {{$json.title}}
+  Watch now: https://www.youtube.com/watch?v={{$json.videoId}}
+  ```
+
+## Social Media Sharing Workflow
+
+This workflow automatically shares new videos to Twitter/X and Facebook.
+
+### Workflow Steps:
+
+1. **Webhook Node**: Receives notifications from the YouTube Notification System
+2. **Twitter Node**: Posts a tweet about the new video
+3. **Facebook Node**: Creates a post on a Facebook page
+
+### Configuration:
+
+#### Twitter Node
+- **Authentication**: Connect to your Twitter/X account
+- **Text**: Use an expression like:
+  ```
+  🎬 New video from {{$json.channelTitle}}: {{$json.title}}
+  Watch now: https://www.youtube.com/watch?v={{$json.videoId}}
+  #YouTube #NewVideo
+  ```
+
+#### Facebook Node
+- **Authentication**: Connect to your Facebook account
+- **Page**: Select the page to post to
+- **Post Type**: Create Post
+- **Content**: Use an expression similar to the Twitter text
+
+## Database Archiving Workflow
+
+This workflow saves information about new videos to a database for archiving or further processing.
+
+### Workflow Steps:
+
+1. **Webhook Node**: Receives notifications from the YouTube Notification System
+2. **Database Node** (e.g., PostgreSQL, MySQL, MongoDB): Inserts video data into a database
+
+### Configuration:
+
+#### Database Node (PostgreSQL example)
+- **Authentication**: Connect to your database
+- **Operation**: Insert
+- **Table**: `youtube_videos`
+- **Columns to Send**:
+  - `video_id`: `{{$json.videoId}}`
+  - `title`: `{{$json.title}}`
+  - `channel_id`: `{{$json.channelId}}`
+  - `channel_title`: `{{$json.channelTitle}}`
+  - `published_at`: `{{$json.publishedAt}}`
+  - `description`: `{{$json.description}}`
+  - `thumbnail_url`: `{{$json.thumbnails.high.url}}`
+  - `created_at`: `{{$now}}`
+
+## Content Filtering Workflow
+
+This workflow filters videos based on their titles or descriptions and only sends notifications for videos that match certain criteria.
+
+### Workflow Steps:
+
+1. **Webhook Node**: Receives notifications from the YouTube Notification System
+2. **IF Node**: Checks if the video title or description contains specific keywords
+3. **Slack Node**: Sends a notification only if the condition is met
+
+### Configuration:
+
+#### IF Node
+- **Condition 1**:
+  - **Value 1**: `{{$json.title}}`
+  - **Operation**: Contains
+  - **Value 2**: `tutorial` (or any keyword you're interested in)
+- **Condition 2** (optional):
+  - **Value 1**: `{{$json.description}}`
+  - **Operation**: Contains
+  - **Value 2**: `tutorial`
+- **Combine Condition**: OR
+
+## Multi-Channel Workflow
+
+This workflow processes videos differently based on which channel they come from.
+
+### Workflow Steps:
+
+1. **Webhook Node**: Receives notifications from the YouTube Notification System
+2. **Switch Node**: Routes the workflow based on the channel ID
+3. **Various Action Nodes**: Different actions for different channels
+
+### Configuration:
+
+#### Switch Node
+- **Data Type**: String
+- **Value**: `{{$json.channelId}}`
+- **Rules**:
+  - **Rule 1**:
+    - **Value 1**: `UCxxx` (first channel ID)
+    - **Action**: Connect to Slack node for team 1
+  - **Rule 2**:
+    - **Value 1**: `UCyyy` (second channel ID)
+    - **Action**: Connect to Slack node for team 2
+  - **Default**: Connect to a general notification node
+
+## Advanced: Video Download and Processing
+
+This advanced workflow downloads the video, extracts audio, and saves it to cloud storage.
+
+### Workflow Steps:
+
+1. **Webhook Node**: Receives notifications from the YouTube Notification System
+2. **HTTP Request Node**: Calls a service like youtube-dl to download the video
+3. **Execute Command Node**: Extracts audio using ffmpeg
+4. **S3 Node**: Uploads the audio file to Amazon S3 or similar storage
+
+### Configuration:
+
+This workflow requires additional setup with tools like youtube-dl and ffmpeg, and is provided as an advanced example. The specific configuration will depend on your server setup and requirements.
+
+## Subscription Management Workflow
+
+This workflow helps manage your YouTube channel subscriptions by checking their status and renewing them automatically.
+
+### Workflow Steps:
+
+1. **Schedule Trigger Node**: Runs daily
+2. **HTTP Request Node**: Calls the subscription status API
+3. **IF Node**: Checks if any subscriptions are expiring soon
+4. **HTTP Request Node**: Renews subscriptions if needed
+
+### Configuration:
+
+#### Schedule Trigger Node
+- **Frequency**: Daily
+
+#### HTTP Request Node (Status Check)
+- **Method**: GET
+- **URL**: `https://your-api-url.com/api/subscription-status?userKey=YOUR_USER_KEY`
+
+#### IF Node
+- **Condition**:
+  - **Value 1**: `{{$json.daysUntilExpiration}}`
+  - **Operation**: Smaller
+  - **Value 2**: 2
+
+#### HTTP Request Node (Renewal)
+- **Method**: POST
+- **URL**: `https://your-api-url.com/api/subscribe`
+- **Headers**: `Content-Type: application/json`
+- **Body**: 
+  ```json
+  {
+    "channelIds": ["UCxxx", "UCyyy"],
+    "webhookUrl": "https://your-n8n-instance.com/webhook/youtube-notifications",
+    "userKey": "YOUR_USER_KEY"
+  }
+  ```
+
+## Importing These Workflows
+
+You can import these workflow examples into your N8N instance by:
+
+1. Creating a new workflow in N8N
+2. Using the import feature to import a JSON workflow definition
+3. Configuring the credentials and parameters to match your environment
+
+We'll be adding downloadable workflow templates in the future to make this process even easier. 

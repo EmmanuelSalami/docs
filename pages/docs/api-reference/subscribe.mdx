@@ -1,0 +1,108 @@
+# Subscribe API
+
+The Subscribe API allows you to subscribe to YouTube channels and receive notifications when new videos are published.
+
+## Endpoint
+
+```
+POST /api/subscribe
+```
+
+## Use Cases
+
+- **Initial Subscription**: Subscribe to YouTube channels for the first time
+- **Adding New Channels**: Add new channels to your existing subscription
+- **Subscription Renewal**: Renew your subscription before it expires
+
+## How It Works
+
+1. You send a POST request to the Subscribe API with your webhook URL and the channel IDs you want to subscribe to
+2. The API registers your webhook URL and the channel IDs with YouTube's PubSubHubbub hub
+3. YouTube sends a verification request to our system to confirm the subscription
+4. Our system responds to the verification request and confirms the subscription
+5. YouTube sends notifications to our system when new videos are published on the channels you've subscribed to
+6. Our system forwards the notifications to your webhook URL
+
+## Request Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `channelIds` | Array of strings | An array of YouTube channel IDs to subscribe to |
+| `webhookUrl` | String | The URL where notifications should be sent |
+
+## Example Request
+
+```json
+{
+  "channelIds": [
+    "UCxxx",
+    "UCyyy"
+  ],
+  "webhookUrl": "https://your-webhook-url.com"
+}
+```
+
+## Response
+
+The API returns a JSON object with the following fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `success` | Boolean | Whether the subscription was successful |
+| `userKey` | String | A unique key that identifies your subscription |
+| `subscribedChannels` | Array of objects | An array of objects containing information about the channels you've subscribed to |
+| `failedChannels` | Array of objects | An array of objects containing information about channels that failed to subscribe |
+
+## Example Response
+
+```json
+{
+  "success": true,
+  "userKey": "abc123",
+  "subscribedChannels": [
+    {
+      "channelId": "UCxxx",
+      "status": "pending",
+      "expiresAt": "2023-04-01T00:00:00.000Z"
+    },
+    {
+      "channelId": "UCyyy",
+      "status": "pending",
+      "expiresAt": "2023-04-01T00:00:00.000Z"
+    }
+  ],
+  "failedChannels": []
+}
+```
+
+## Subscription Renewal
+
+Subscriptions to YouTube channels expire after a certain period (usually 7 days). To ensure you continue receiving notifications, you should renew your subscription before it expires. You can do this by sending the same request to the Subscribe API with the same webhook URL and channel IDs.
+
+## Best Practices
+
+- **Store the User Key**: The `userKey` returned in the response is used to identify your subscription. Store it securely as you'll need it for other API calls.
+- **Renew Subscriptions**: Set up a scheduled task to renew your subscriptions before they expire.
+- **Handle Verification**: YouTube sends a verification request to your webhook URL when you subscribe. Make sure your webhook can handle this request.
+
+## N8N Integration
+
+If you're using N8N, you can set up a webhook node to receive notifications from the YouTube Notification System. See the [N8N Integration](/docs/n8n-integration/getting-started) guide for more information.
+
+## Error Handling
+
+The API returns appropriate HTTP status codes and error messages if something goes wrong:
+
+| Status Code | Description |
+| --- | --- |
+| 400 | Bad Request - The request was invalid or missing required parameters |
+| 500 | Internal Server Error - Something went wrong on the server |
+
+## Example Error Response
+
+```json
+{
+  "success": false,
+  "error": "Missing required parameter: channelIds"
+}
+``` 

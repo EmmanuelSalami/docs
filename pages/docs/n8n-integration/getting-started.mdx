@@ -1,0 +1,85 @@
+# Getting Started with N8N Integration
+
+This guide will help you set up N8N to work with the YouTube Notification System. N8N is a powerful workflow automation tool that allows you to connect different services and automate tasks.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+1. An N8N instance set up and running
+2. Access to the YouTube Notification System
+3. YouTube channel IDs you want to subscribe to
+
+## Setting Up the Webhook Node
+
+The first step is to set up a webhook node in N8N to receive notifications from the YouTube Notification System:
+
+1. In your N8N workflow, add a new **Webhook** node
+2. Configure it as follows:
+   - **Authentication**: None
+   - **HTTP Method**: POST
+   - **Path**: Choose a unique path (e.g., `/youtube-notifications`)
+   - **Response Mode**: Last Node
+   - **Response Code**: 200
+   - **Response Data**: JSON
+
+3. Save the node and copy the webhook URL (it should look like `https://your-n8n-instance.com/webhook/youtube-notifications`)
+
+## Subscribing to YouTube Channels
+
+Now that you have your webhook URL, you can subscribe to YouTube channels using the YouTube Notification System:
+
+```bash
+curl -X POST https://your-api-url.com/api/subscribe \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channelIds": ["UCxxx", "UCyyy"],
+    "webhookUrl": "https://your-n8n-instance.com/webhook/youtube-notifications"
+  }'
+```
+
+Replace `UCxxx` and `UCyyy` with the actual YouTube channel IDs you want to subscribe to.
+
+## Processing Notifications
+
+When a new video is published on one of the subscribed channels, the YouTube Notification System will send a notification to your webhook URL. The notification will contain information about the video, including:
+
+- Video ID
+- Title
+- Channel ID
+- Channel Title
+- Publication Date
+- Description
+- Thumbnail URLs
+
+You can use this information to trigger actions in your N8N workflow, such as:
+
+- Sending a notification to Slack, Discord, or other messaging platforms
+- Creating a social media post
+- Adding the video to a database
+- Triggering other automation workflows
+
+## Setting Up Auto-Renewal
+
+Subscriptions to YouTube channels expire after a certain period (usually 7 days). To ensure you continue receiving notifications, you should set up a workflow to automatically renew your subscriptions before they expire:
+
+1. In N8N, create a new workflow
+2. Add a **Schedule Trigger** node and configure it to run every 6 days
+3. Add an **HTTP Request** node and configure it as follows:
+   - **Method**: POST
+   - **URL**: `https://your-api-url.com/api/subscribe`
+   - **Headers**: `Content-Type: application/json`
+   - **Body**: 
+     ```json
+     {
+       "channelIds": ["UCxxx", "UCyyy"],
+       "webhookUrl": "https://your-n8n-instance.com/webhook/youtube-notifications"
+     }
+     ```
+4. Save and activate the workflow
+
+This will ensure that your subscriptions are renewed before they expire, so you continue receiving notifications.
+
+## Next Steps
+
+Now that you have set up the basic integration, you can explore more advanced workflows. Check out the [Workflow Examples](/docs/n8n-integration/workflow-examples) page for ideas on how to use the YouTube Notification System with N8N. 

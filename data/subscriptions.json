@@ -1,0 +1,11 @@
+[
+  {
+    "userKey": "3dc5893d-ef73-4829-9eb3-3ab21f474f0c",
+    "channelIds": [
+      "UC1PsYPhJWpgcM88C4txYp1Q",
+      "UCG_I41yfClFjFNIuXm_xOHg"
+    ],
+    "webhookUrl": "https://example.com/my-webhook",
+    "timestamp": "2025-02-28T17:32:06.265Z"
+  }
+]
